@@ -1,0 +1,50 @@
+# Example vehicle parameters — replace with your car's real values.
+# Get Cd*A and Crr from a coast-down test where possible; don't guess these.
+
+mass_kg: 45.0                # vehicle + driver mass
+rotational_inertia_kg: 2.0    # equivalent mass of rotating parts (wheels, drivetrain)
+
+aero:
+  Cd: 0.15
+  frontal_area_m2: 0.4
+  air_density_kg_m3: 1.225
+
+rolling_resistance:
+  Crr: 0.008
+
+battery:
+  capacity_Ah: 5.0
+  nominal_voltage_V: 48.0
+  internal_resistance_ohm: 0.05
+  # OCV(SoC) curve — replace with your cell's real discharge curve
+  ocv_soc_table:
+    soc: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+    ocv_v: [44.0, 46.5, 47.5, 48.0, 48.5, 50.0]
+
+motor:
+  # Example torque/rpm grid for efficiency map — replace with dyno/datasheet data
+  rpm_points: [500, 1000, 1500, 2000, 2500, 3000]
+  torque_points: [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0]
+  # efficiency_table: rows = torque_points, cols = rpm_points (fill in real data)
+  efficiency_table:
+    - [0.59, 0.65, 0.69, 0.69, 0.65, 0.59]
+    - [0.61, 0.68, 0.72, 0.72, 0.68, 0.61]
+    - [0.63, 0.70, 0.75, 0.75, 0.70, 0.63]
+    - [0.64, 0.72, 0.79, 0.79, 0.72, 0.64]
+    - [0.65, 0.73, 0.81, 0.81, 0.73, 0.65]
+    - [0.65, 0.73, 0.80, 0.80, 0.73, 0.65]
+    - [0.63, 0.70, 0.75, 0.75, 0.70, 0.63]
+    - [0.59, 0.64, 0.68, 0.68, 0.64, 0.59]
+    - [0.54, 0.58, 0.61, 0.61, 0.58, 0.54]
+  # Torque-speed envelope (see MotorMap.max_torque_at) — replace with a real
+  # datasheet curve; a straight line between stall torque and no-load speed
+  # is a fine placeholder.
+  stall_torque_Nm: 6.0
+  no_load_rpm: 3200
+
+drivetrain:
+  wheel_radius_m: 0.28
+  gear_ratio: 3.0    # motor rpm / wheel rpm; 1.0 if direct-drive
+
+brakes:
+  max_force_N: 150.0   # speed-independent mechanical brake force cap
