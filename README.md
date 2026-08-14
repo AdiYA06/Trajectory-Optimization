@@ -32,10 +32,10 @@ A lightweight longitudinal simulation project for an electric vehicle energy and
 From the project root, run:
 
 ```bash
-python example_run.py
+python ocp_test.py
 ```
 
-This loads the configuration, builds a vehicle, simulates a lap, and demonstrates the strategy/optimization flow.
+This loads the configuration, builds a vehicle, iterates over a lap, and demonstrates the strategy/optimization flow.
 
 ## Configuration
 
@@ -74,26 +74,7 @@ This project is meant to be an iterative engineering model rather than a finishe
 
 ## Example workflow
 
-```python
-from sem_twin.config import load_config
-from sem_twin.track_model import Track
-from sem_twin.vehicle_long import LongitudinalVehicle
-from sem_twin.sim_runner import run_lap
-from sem_twin.strategies import PulseAndGlideStrategy
-
-cfg = load_config("config/vehicle_params.yaml", battery_type="simple")
-track = Track.from_gpx("Silverstone Circuit Loop.gpx")
-vehicle = LongitudinalVehicle(
-    params=cfg.vehicle_params,
-    powertrain=cfg.powertrain,
-    battery=cfg.build_battery(),
-    track=track,
-    brake_max_force_N=cfg.brake_max_force_N,
-)
-
-log = run_lap(vehicle, PulseAndGlideStrategy(v_high=9.0, v_low=6.0), track)
-print(log.t[-1], log.soc[-1])
-```
+Check ocp_test.py
 
 ## Requirements
 
@@ -102,6 +83,7 @@ This project is built with Python and commonly relies on:
 - NumPy
 - PyYAML
 - GPX parsing support when loading track files
+- CASADI
 
 ## Status
 
