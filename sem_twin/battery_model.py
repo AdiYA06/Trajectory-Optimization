@@ -1,9 +1,3 @@
-"""
-Battery model — build SimpleBattery first, get the whole sim loop working,
-then swap in ECMBattery without changing any other module (that's the point
-of giving both the same interface).
-"""
-
 import numpy as np
 
 

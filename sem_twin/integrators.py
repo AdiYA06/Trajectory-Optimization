@@ -1,17 +1,3 @@
-"""
-Fixed-step integrators for the longitudinal model.
-
-Kept separate from sim_runner.py so you can swap Euler <-> RK4 without
-touching the simulation loop, and so you can unit-test a single step in
-isolation (e.g. against a known analytic solution) before trusting the
-full lap simulation.
-
-Both functions have the same shape: given a state, a function that computes
-derivatives, and a step size, return the next state. `vehicle_long.LongState`
-supports +, *, etc. is NOT assumed here — see the note in each function about
-why state arithmetic needs to be explicit for a plain class.
-"""
-
 from sem_twin.vehicle_long import LongState
 
 

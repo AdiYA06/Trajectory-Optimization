@@ -1,17 +1,3 @@
-"""
-Single source of truth for vehicle/motor/battery parameters.
-
-Everything else (vehicle_long.py, powertrain_model.py, battery_model.py,
-optimizer.py) takes already-built objects (VehicleParams, MotorMap, etc.) —
-this module is the only place that knows about the YAML file's layout.
-If you rename a field in config/vehicle_params.yaml, this is the only file
-that needs to change to match.
-
-This module is plain I/O/wiring, not vehicle physics, so it's fully
-implemented rather than left as TODOs — the physics stubs are all in the
-model classes it constructs.
-"""
-
 import numpy as np
 import yaml
 

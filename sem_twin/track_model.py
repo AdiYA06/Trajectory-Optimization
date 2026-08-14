@@ -1,16 +1,3 @@
-"""
-Track model.
-
-Everything here is indexed by distance `s` (metres along the track), not time.
-The track owns three arrays: gradient(s), curvature(s), v_limit(s).
-
-Build order:
-    1. Implement `make_synthetic_track()` first — a few straight/hill/corner
-       segments concatenated together. Get the interpolation working and
-       plot it before touching anything else.
-    2. Later, add `Track.from_gpx()` to load a real track.
-"""
-
 import numpy as np
 
 def latlong_to_xy(lat, lon, lat0, lon0):

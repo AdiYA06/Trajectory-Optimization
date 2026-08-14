@@ -1,15 +1,3 @@
-"""
-Longitudinal vehicle model. This is the heart of the twin — get this right
-and validated (Section 6 of the roadmap: coast-down + energy balance) before
-building anything on top of it.
-
-Two integration approaches, pick one to start:
-    (a) time-domain: state = [v, s], integrate with scipy.integrate.solve_ivp
-    (b) space-domain: state = [v, t], independent variable = s, dv/ds = F_net/(m*v)
-Space-domain is what you'll want eventually for the optimizer (Section 4),
-so consider building it that way from the start rather than converting later.
-"""
-
 import numpy as np
 
 class VehicleParams:

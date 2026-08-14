@@ -1,13 +1,3 @@
-"""
-Example wiring: config -> track -> vehicle -> strategy -> sim -> optimizer.
-
-This won't actually run until you've filled in the NotImplementedError stubs
-in track_model.py, vehicle_long.py, powertrain_model.py, battery_model.py,
-and integrators.py — it exists to show how everything connects once they are.
-
-Run as: python example_run.py   (from the project root)
-"""
-
 from sem_twin.config import load_config
 from sem_twin.track_model import Track
 from sem_twin.vehicle_long import LongitudinalVehicle

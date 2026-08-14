@@ -1,10 +1,3 @@
-"""
-Ties everything together: run one full lap for a given strategy and log
-every quantity you'll need later (for plotting, validation, and the
-optimizer's objective function).
-"""
-
-# import numpy as np
 import pandas as pd
 from sem_twin.vehicle_long import LongitudinalVehicle, LongState
 from sem_twin.integrators import euler_step, rk4_step

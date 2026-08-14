@@ -1,15 +1,3 @@
-"""
-Two very different optimizers live here, matching Section 4 of the roadmap:
-
-1. `optimize_strategy_params` — cheap, wraps scipy.optimize around one of the
-   parametrized strategies (e.g. find the best v_high/v_low for pulse-and-glide).
-   Build this first — it's a thin wrapper around sim_runner.run_lap.
-
-2. `build_ocp` — the real optimal-control formulation with CasADi. This is a
-   later-stage piece (roadmap step 8); stubbed here so the interface exists,
-   but don't start on it until strategy-search + validated dynamics are solid.
-"""
-
 import numpy as np
 import casadi as ca
 from sem_twin.vehicle_long import LongitudinalVehicle

@@ -1,10 +1,3 @@
-"""
-Driving strategies: a strategy is just a function/callable that takes the
-current state and returns (throttle, brake) in [0,1]. Keeping this as a
-uniform interface means sim_runner.py doesn't care which strategy it's
-running, and the optimizer (Section 4) is really just "search over the
-parameters of one of these functions".
-"""
 import numpy as np
 from typing import Protocol
 from sem_twin.vehicle_long import LongState
