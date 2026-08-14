@@ -1,56 +1,108 @@
-# SEM Digital Twin — Skeleton
+﻿# SEM Twin
 
-Every function/method that says `raise NotImplementedError` is where you write
-the actual physics/logic. The docstrings tell you *what* the function needs
-to do and roughly *how*, matching the equations in the project roadmap doc.
-Nothing here does any real math yet — it's the scaffolding, not the twin.
+A lightweight longitudinal simulation project for an electric vehicle energy and performance twin. The code is organized around a config-driven vehicle model, a battery and powertrain, track data, and simple strategy or optimization workflows.
 
-`example_run.py` at the project root shows the full wiring end-to-end (config
--> track -> vehicle -> strategy -> sim -> optimizer). It won't run until the
-stubs below are filled in, but it's the reference for how the pieces connect.
-Needs `pyyaml` (`pip install pyyaml --break-system-packages`).
+## What this project includes
 
-## Build order (fill things in, in this order)
+- Vehicle and powertrain configuration from a YAML file
+- Track definitions, including GPX-based road loading
+- Longitudinal dynamics for a battery-electric vehicle
+- Battery models for simple and ECM-style behavior
+- Lap simulation using driver strategies
+- Basic optimization routines for strategy parameter tuning
 
-1. `config.py::load_config` — already fully implemented (it's I/O, not
-   physics). Skim it so you know what `config/vehicle_params.yaml` maps to
-   in each model class; add your own fields here as you need them.
-2. `track_model.py::Track.make_synthetic_track` — get a track you can plot.
-3. `vehicle_long.py::LongitudinalVehicle.road_load_forces` and `.derivatives`
-   — get the core equation of motion working with a *dummy* constant-efficiency
-   motor and `SimpleBattery` first. Don't touch the real motor map yet.
-   Note: `derivatives()` is a pure rates function (no battery side effects);
-   `commit_step()` is the separate method that actually advances SoC once
-   per real timestep. Keep that split — it matters once you use RK4.
-4. `integrators.py::euler_step` — implement this before `rk4_step`. It's the
-   simplest possible way to advance `state` using `derivatives()`.
-5. `sim_runner.py::run_lap` — wire it up with `euler_step`, run
-   `ConstantSpeedStrategy`, plot `v(t)` and `s(t)`. This is your first real
-   milestone. Swap in `rk4_step` later once the loop itself is correct.
-6. `powertrain_model.py::MotorMap` + `Powertrain` — swap the dummy motor for
-   the real map interpolation.
-7. `battery_model.py::SimpleBattery` fully, then validate energy balance
-   against `road_load_forces` output (Section 6 of the roadmap).
-8. `strategies.py` — implement all three parametrized strategies.
-9. `optimizer.py::optimize_strategy_params` — compare strategies properly.
-10. `battery_model.py::ECMBattery` — swap in without touching anything else.
-11. `vehicle_lat.py` (not yet created — add when you get here) — bicycle model,
-   feeds real `v_limit(s)` back into `track_model.py`.
-12. `optimizer.py::build_ocp` — the CasADi optimal control formulation.
+## Project layout
 
-## Sanity checks to run as you go
+- `config/vehicle_params.yaml` — baseline vehicle, drivetrain, motor, and battery settings
+- `example_run.py` — example entry point showing how the model is wired together
+- `sem_twin/` — core simulation modules
+  - `battery_model.py`
+  - `config.py`
+  - `integrators.py`
+  - `ocp_dynamics.py`
+  - `optimizer.py`
+  - `powertrain_model.py`
+  - `sim_runner.py`
+  - `strategies.py`
+  - `track_model.py`
+  - `vehicle_long.py`
 
-- Plot `track.gradient`, `track.curvature`, `track.v_limit` vs `s` before
-  doing anything else — a bug here silently breaks everything downstream.
-- After step 3: does the car's terminal speed on a flat straight roughly match
-  `F_motor(v) = F_aero(v) + F_roll` solved for v? (steady-state check)
-- After step 5: does `energy_in == KE_change + PE_change + losses`, within a
-  small numerical tolerance? If not, you have a sign error or a missing term
-  somewhere in `derivatives()`.
+## Quick start
 
-## Not included yet (intentionally)
+From the project root, run:
 
-- `vehicle_lat.py` (bicycle model) — add once the longitudinal side is
-  validated; the roadmap doc has the equations.
-- Real motor efficiency data, real OCV-SoC curve, real Cd·A/Crr from a
-  coast-down test — the config file has placeholders only.
+```bash
+python example_run.py
+```
+
+This loads the configuration, builds a vehicle, simulates a lap, and demonstrates the strategy/optimization flow.
+
+## Configuration
+
+The main parameter file is:
+
+```text
+config/vehicle_params.yaml
+```
+
+Adjust values such as:
+
+- vehicle mass
+- aerodynamic drag and rolling resistance
+- battery capacity and voltage
+- motor efficiency map and torque envelope
+- wheel radius and gear ratio
+- brake force limit
+
+## Track data
+
+The project supports synthetic tracks and GPX imports. A GPX example is included in the repository root:
+
+```text
+Silverstone Circuit Loop.gpx
+```
+
+## Notes on the model
+
+This project is meant to be an iterative engineering model rather than a finished turnkey app. The typical workflow is:
+
+1. Define parameters in the YAML file.
+2. Build a vehicle and track.
+3. Run a strategy over one lap.
+4. Compare lap time and SoC outcomes.
+5. Use the optimizer to sweep strategy parameters.
+
+## Example workflow
+
+```python
+from sem_twin.config import load_config
+from sem_twin.track_model import Track
+from sem_twin.vehicle_long import LongitudinalVehicle
+from sem_twin.sim_runner import run_lap
+from sem_twin.strategies import PulseAndGlideStrategy
+
+cfg = load_config("config/vehicle_params.yaml", battery_type="simple")
+track = Track.from_gpx("Silverstone Circuit Loop.gpx")
+vehicle = LongitudinalVehicle(
+    params=cfg.vehicle_params,
+    powertrain=cfg.powertrain,
+    battery=cfg.build_battery(),
+    track=track,
+    brake_max_force_N=cfg.brake_max_force_N,
+)
+
+log = run_lap(vehicle, PulseAndGlideStrategy(v_high=9.0, v_low=6.0), track)
+print(log.t[-1], log.soc[-1])
+```
+
+## Requirements
+
+This project is built with Python and commonly relies on:
+
+- NumPy
+- PyYAML
+- GPX parsing support when loading track files
+
+## Status
+
+The repository is structured as a modeling and simulation sandbox for vehicle performance and energy estimation. It is suitable for experimentation, tuning, and extending the model as the project evolves.
