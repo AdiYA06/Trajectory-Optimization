@@ -1,6 +1,6 @@
 import pandas as pd
 from sem_twin.vehicle_long import LongitudinalVehicle, LongState
-from sem_twin.integrators import euler_step, rk4_step
+from sem_twin.integrators import rk4_step
 
 
 class SimLog:

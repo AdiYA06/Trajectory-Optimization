@@ -2,8 +2,8 @@ from sem_twin.config import load_config
 from sem_twin.track_model import Track
 from sem_twin.vehicle_long import LongitudinalVehicle
 from sem_twin.sim_runner import run_lap
-from sem_twin.strategies import ConstantSpeedStrategy, PulseAndGlideStrategy, FullAccelerateThenCoastStrategy, OCPReplay
-from sem_twin.optimizer import optimize_strategy_params, build_ocp
+from sem_twin.strategies import PulseAndGlideStrategy
+from sem_twin.optimizer import optimize_strategy_params
 
 
 def main():
