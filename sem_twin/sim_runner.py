@@ -21,8 +21,6 @@ class SimLog:
 
 def run_lap(vehicle: LongitudinalVehicle, strategy, track, dt: float = 0.05, 
             max_time: float = 1000) -> SimLog:
-    """Run one lap (until state.s >= track.length_m) with a fixed-step
-    integrator, logging everything along the way."""
 
     state = LongState(v=0, s=0, t=0, soc=1.0)
     log = SimLog()
@@ -47,16 +45,3 @@ def run_lap(vehicle: LongitudinalVehicle, strategy, track, dt: float = 0.05,
         if int(state.t * 10) % 100 == 0:   # print roughly every 10 seconds
             print(f"t={state.t:.1f} v={state.v:.3f} s={state.s:.2f}")
     return log
-    """Start with euler_step to get the loop itself working end-to-end: it's
-    one line simpler per step and easier to debug when something's wrong
-    with the *loop* rather than the *integration accuracy*. Swap in rk4_step
-    once the loop is correct and you're ready to care about accuracy.
-
-    Things to watch for:
-        - What happens if SoC hits 0 mid-lap? Decide: cap electrical power,
-          or let the vehicle coast, or raise an error — this matters once
-          you're comparing energy-hungry strategies.
-        - What happens right at the finish line (s slightly overshoots
-          track.length_m in the last step)? Fine to ignore for now, but note
-          it if you need exact lap-time precision later.
-    """

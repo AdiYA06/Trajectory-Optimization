@@ -9,16 +9,12 @@ class BatteryState:
 
 
 class SimpleBattery:
-    """Coulomb-counting energy bucket. No voltage dynamics."""
-
     def __init__(self, capacity_Ah: float, nominal_voltage_V: float, soc0: float = 1.0):
         self.capacity_As = capacity_Ah * 3600.0
         self.nominal_voltage_V = nominal_voltage_V
         self.soc = soc0
 
     def step(self, power_elec_W: float, dt_s: float) -> BatteryState:
-        """Given requested electrical power (positive = discharge), advance
-        SoC by dt_s and return the resulting state."""
         current = power_elec_W / self.nominal_voltage_V   # (constant-voltage assumption — this is the simplification you remove in ECMBattery)
         delta_soc = - (current * dt_s) / self.capacity_As
         self.soc += delta_soc
@@ -26,11 +22,6 @@ class SimpleBattery:
         return BatteryState(soc=self.soc, voltage=self.nominal_voltage_V, current=current)
 
 class ECMBattery:
-    """Equivalent-circuit (Rint) model: V_term = OCV(SoC) - I * R_int.
-
-    This is where voltage sag and current/power limits come from — the
-    two things SimpleBattery can't give you.
-    """
 
     def __init__(self, capacity_Ah: float, r_int_ohm: float,
                  ocv_soc_table: dict, soc0: float = 1.0):
@@ -43,7 +34,6 @@ class ECMBattery:
         return np.interp(soc, self.ocv_soc_table['soc'], self.ocv_soc_table['ocv_v'])
 
     def solve_current_for_power(self, power_req_W: float) -> float:
-        """Given requested electrical power, solve the quadratic for current:"""
         # P = V_term * I = (OCV - I*R_int) * I
         # R_int*I^2 - OCV*I + P = 0
         OCV = self.ocv_at(self.soc)
@@ -51,7 +41,6 @@ class ECMBattery:
         return I
 
     def step(self, power_elec_W: float, dt: float) -> BatteryState:
-        """Given requested electrical power (positive = discharge), advance"""
         current = self.solve_current_for_power(power_elec_W)
         delta_soc = -(current * dt) / self.capacity_As
         self.soc += delta_soc

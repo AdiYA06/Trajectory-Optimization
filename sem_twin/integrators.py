@@ -2,14 +2,11 @@ from sem_twin.vehicle_long import LongState
 
 
 def euler_step(state: LongState, derivatives_fn: LongState, dt: float) -> LongState:
-    """Simplest possible integrator: one derivative evaluation per step."""
     d = derivatives_fn(state)   # d is presumably also a LongState-shaped
                                 # object holding rates: dv/dt, ds/dt, etc.
     return LongState(v=state.v + d.v * dt, s=state.s + d.s * dt, t=state.t + dt, soc=state.soc + d.soc * dt)
 
 def state_shifted_by(state: LongState, rate: LongState, scale: float) -> LongState:
-    """Helper: state + rate * scale, field by field. Used internally by
-    rk4_step's midpoint estimates."""
     v = state.v + rate.v * scale
     s = state.s + rate.s * scale
     t = state.t + rate.t * scale
@@ -17,9 +14,6 @@ def state_shifted_by(state: LongState, rate: LongState, scale: float) -> LongSta
     return LongState(v=v, s=s, t=t, soc=soc)
 
 def rk4_step(state: LongState, derivatives_fn, dt: float) -> LongState:
-    """Classic 4th-order Runge-Kutta. ~4x the cost of euler_step per step,
-    but you can usually take a much larger dt for the same accuracy, so it
-    often ends up cheaper overall."""
     k1 = derivatives_fn(state)
     k2 = derivatives_fn(state_shifted_by(state, k1, dt/2))
     k3 = derivatives_fn(state_shifted_by(state, k2, dt/2))

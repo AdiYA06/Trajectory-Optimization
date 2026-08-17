@@ -5,12 +5,10 @@ from sem_twin.vehicle_long import LongState
 
 class Strategy(Protocol):
     def __call__(self, state: LongState, track) -> tuple[float, float]:
-        """Return (throttle, brake), each in [0, 1]."""
         ...
 
 
 class ConstantSpeedStrategy:
-    """Baseline: simple proportional controller trying to hold target_v."""
 
     def __init__(self, target_v: float, kp: float = 1.0):
         self.target_v = target_v
@@ -25,11 +23,8 @@ class ConstantSpeedStrategy:
             throttle = 0
             brake = np.clip(-self.kp * diff_v, 0, 1)
         return [throttle, brake]
-        """A proper controller might use PI rather than P to remove steady-state
-        error on gradients — worth revisiting once you see it misbehave uphill."""
 
 class PulseAndGlideStrategy:
-    """Accelerate to v_high, then coast (throttle=0) until v_low, repeat."""
 
     def __init__(self, v_high: float, v_low: float):
         self.v_high = v_high
@@ -48,15 +43,9 @@ class PulseAndGlideStrategy:
             throttle = 1.0 if self._accelerating else 0.0
             return [throttle, 0.0]
         # return is throttle, brake. brale always 0.0 in glide
-        """Note the strategy is stateful (mode flag) — reset it between runs,
-        e.g. give it a `.reset()` method, or construct a fresh instance per run.
-        """
 
 
 class FullAccelerateThenCoastStrategy:
-    """Accelerate fully once, then coast for the rest of the lap. Useful as
-    the crudest possible baseline alongside ConstantSpeedStrategy.
-    """
     def __init__(self, release_v: float):
         self.release_v = release_v
 

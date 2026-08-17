@@ -7,7 +7,6 @@ def latlong_to_xy(lat, lon, lat0, lon0):
     return x, y
 
 def _straight_segment(length_m: float, ds: float, v_limit: float = 20.0):
-    """Build a straight segment of the track, sampled at ds metres."""
     n = int(length_m / ds)
     s = np.arange(n) * ds
     gradient = np.zeros(n)
@@ -54,25 +53,19 @@ class Track:
         return float(self.s[-1])
 
     def gradient_at(self, s_check: float) -> float:
-        """Interpolate gradient at arbitrary distance s."""
         grad_s = np.interp(s_check, self.s, self.gradient)
         return grad_s
-        # — decide on boundary behaviour (clip vs extrapolate vs raise).
 
     def curvature_at(self, s_check: float) -> float:
-        """TODO: same pattern as gradient_at."""
         curv_s = np.interp(s_check, self.s, self.curvature)
         return curv_s
 
     def v_limit_at(self, s_check: float) -> float:
-        """TODO: same pattern as gradient_at."""
         v_lim_s = np.interp(s_check, self.s, self.v_limit)
         return v_lim_s
 
     @classmethod
     def make_synthetic_track(cls, ds=1.0) -> "Track":
-        """Build the starter track: straight -> uphill -> downhill -> corners
-        -> start/finish straight."""
         segments = [
         _straight_segment(200, ds),
         _hill_segment(150, peak_grad=0.02, ds=ds),
@@ -101,7 +94,6 @@ class Track:
 
     @classmethod
     def from_gpx(cls, filepath: str) -> "Track":
-        """Load a real track from a GPX file (use `gpxpy`)."""
         import gpxpy
         with open(filepath, "r") as gpx_file:
             gpx = gpxpy.parse(gpx_file)

@@ -9,9 +9,6 @@ from sem_twin.sim_runner import run_lap
 
 def optimize_strategy_params(strategy_factory, param_bounds, vehicle, track,
                               battery_factory, lap_time_limit=None):
-    """Search over a strategy's free parameters to minimise energy (or some
-    other objective) for one lap."""
-
     def cost(params):
         vehicle.battery = battery_factory()
         strategy = strategy_factory(params)
@@ -43,7 +40,7 @@ def build_ocp(vehicle, vehicle_params, motor_map, battery_params, track,
 
     m_eff = vehicle_params.mass_kg + vehicle_params.rotational_inertia_kg
 
-    # Decision variables — Ek replaces v as the state
+    # Decision variables
     Ek = opti.variable(N+1)
     t = opti.variable(N+1)
     soc = opti.variable(N+1)
@@ -61,20 +58,20 @@ def build_ocp(vehicle, vehicle_params, motor_map, battery_params, track,
     v_limit_at_nodes = np.array([float(v_limit_interp(s)) for s in s_nodes])
     Ek_limit_at_nodes = 0.5 * m_eff * v_limit_at_nodes**2     # v_limit -> Ek_limit
     v_min = 0.5
-    Ek_min = 0.5 * m_eff * v_min**2                            # same floor, in Ek terms
+    Ek_min = 0.5 * m_eff * v_min**2
 
-    # 1. State bounds & boundary conditions — all in Ek now
+    # State bounds & boundary conditions
     opti.subject_to(opti.bounded(Ek_min, Ek, Ek_limit_at_nodes))
     opti.subject_to(Ek[0] == Ek_min)
     opti.subject_to(t[0] == 0.0)
     opti.subject_to(soc[0] == 1.0)
-    opti.subject_to(t[N] <= lap_time_limit)
+    opti.subject_to(t[N] <= lap_time_limit)    # time limit constraint to maintain average velocity
 
-    # 2. Control bounds — unchanged
+    # Control bounds
     opti.subject_to(opti.bounded(0.0, throttle, 1.0))
     opti.subject_to(opti.bounded(0.0, brake, 1.0))
 
-    # 3. Dynamic shooting constraints — state vector is now [Ek, t, soc]
+    # Dynamic shooting constraints — state vector [Ek, t, soc]
     for i in range(N):
         state_i = ca.vertcat(Ek[i], t[i], soc[i])
         state_next_predicted = rk4_step(state_i, s_nodes[i], s_nodes[i+1], throttle[i], brake[i])
@@ -86,12 +83,12 @@ def build_ocp(vehicle, vehicle_params, motor_map, battery_params, track,
         grad_k = track.gradient_at(s_nodes[k])
         smooth_ramp = 0.5 * (1.0 + ca.tanh((grad_k - 0.02) / 0.005))
         min_throttle = 0.3 * smooth_ramp
-        opti.subject_to(throttle[k] >= min_throttle)   # <-- uses `i`, not `k`
+        opti.subject_to(throttle[k] >= min_throttle)
 
-    # 5. Objective — unchanged, soc is still soc
+    # Objective
     opti.minimize(1.0 - soc[N])
 
-    # 6. Initial guess — convert v_guess to Ek_guess
+    # Initial guess
     log = run_lap(vehicle, ConstantSpeedStrategy(target_v=15.0), track)
     v_guess = np.interp(s_nodes, log.s, log.v)
     v_guess = np.maximum(v_min, v_guess)
